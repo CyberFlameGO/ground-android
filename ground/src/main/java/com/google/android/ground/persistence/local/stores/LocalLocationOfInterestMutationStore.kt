@@ -62,4 +62,9 @@ interface LocalLocationOfInterestMutationStore :
     id: String,
     vararg states: MutationEntitySyncStatus
   ): Single<List<LocationOfInterestMutationEntity>>
+
+  fun insertOrUpdate(loi: LocationOfInterest): @Cold Completable
+
+  /** Deletes LOIs not present in the specified list of LOI IDs. */
+  fun deleteNotIn(surveyId: String, loiIds: List<String>): @Cold Completable
 }

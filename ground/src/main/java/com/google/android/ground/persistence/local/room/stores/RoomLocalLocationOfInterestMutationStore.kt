@@ -33,6 +33,7 @@ import com.google.android.ground.persistence.local.room.models.EntityState
 import com.google.android.ground.persistence.local.room.models.MutationEntitySyncStatus
 import com.google.android.ground.persistence.local.stores.LocalLocationOfInterestMutationStore
 import com.google.android.ground.rx.Schedulers
+import com.google.android.ground.rx.annotations.Cold
 import com.google.android.ground.util.toImmutableList
 import com.google.android.ground.util.toImmutableSet
 import com.google.common.collect.ImmutableList
@@ -50,10 +51,14 @@ import timber.log.Timber
 @Singleton
 class RoomLocalLocationOfInterestMutationStore @Inject internal constructor() :
   LocalLocationOfInterestMutationStore {
-  @Inject lateinit var locationOfInterestDao: LocationOfInterestDao
-  @Inject lateinit var locationOfInterestMutationDao: LocationOfInterestMutationDao
-  @Inject lateinit var userStore: RoomLocalUserStore
-  @Inject lateinit var schedulers: Schedulers
+  @Inject
+  lateinit var locationOfInterestDao: LocationOfInterestDao
+  @Inject
+  lateinit var locationOfInterestMutationDao: LocationOfInterestMutationDao
+  @Inject
+  lateinit var userStore: RoomLocalUserStore
+  @Inject
+  lateinit var schedulers: Schedulers
 
   /**
    * Retrieves the complete set of [LocationOfInterest] associated with the given [Survey] from the
@@ -190,4 +195,10 @@ class RoomLocalLocationOfInterestMutationStore @Inject internal constructor() :
     vararg states: MutationEntitySyncStatus
   ): Single<List<LocationOfInterestMutationEntity>> =
     locationOfInterestMutationDao.findByLocationOfInterestId(id, *states)
+
+  override fun insertOrUpdate(loi: LocationOfInterest): @Cold Completable =
+    locationOfInterestDao.insertOrUpdate(loi.toLocalDataStoreObject()).subscribeOn(schedulers.io())
+
+  override fun deleteNotIn(surveyId: String, loiIds: List<String>): @Cold Completable =
+    locationOfInterestDao.deleteNotIn(surveyId, loiIds).subscribeOn(schedulers.io())
 }
