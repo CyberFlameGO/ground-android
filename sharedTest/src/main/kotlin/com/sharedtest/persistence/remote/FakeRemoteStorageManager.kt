@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Google LLC
+ * Copyright 2020 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,11 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.google.android.ground.model.geometry
+package com.sharedtest.persistence.remote
 
-import com.google.common.collect.ImmutableList
+import android.net.Uri
+import com.google.android.ground.persistence.remote.RemoteStorageManager
+import io.reactivex.Completable
+import io.reactivex.Single
+import java.io.File
+import javax.inject.Inject
 
-/** Represents a single point. */
-data class Point(val coordinate: Coordinate) : Geometry {
-  override val vertices: ImmutableList<Point> = ImmutableList.of(this)
+class FakeRemoteStorageManager @Inject internal constructor() : RemoteStorageManager {
+  override fun getDownloadUrl(remoteDestinationPath: String): Single<Uri> = Single.never()
+
+  override fun uploadMediaFromFile(file: File, remoteDestinationPath: String): Completable =
+    Completable.never()
 }

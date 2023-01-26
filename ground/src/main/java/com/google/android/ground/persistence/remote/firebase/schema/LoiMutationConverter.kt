@@ -23,7 +23,6 @@ import com.google.android.ground.model.mutation.LocationOfInterestMutation
 import com.google.android.ground.model.mutation.Mutation
 import com.google.android.ground.persistence.remote.firebase.schema.AuditInfoConverter.fromMutationAndUser
 import com.google.android.ground.util.toImmutableList
-import com.google.common.collect.ImmutableList
 import com.google.common.collect.ImmutableMap
 import com.google.firebase.firestore.GeoPoint
 
@@ -41,12 +40,11 @@ internal object LoiMutationConverter {
 
     map.put(LoiConverter.JOB_ID, mutation.jobId)
 
-    when (mutation.geometry) {
-      is Point -> map.put(LoiConverter.LOCATION, toGeoPoint(mutation.geometry))
+    when (val geometry = mutation.geometry?.getGeometry()) {
+      is Point -> map.put(LoiConverter.LOCATION, toGeoPoint(geometry))
       is Polygon -> {
         val geometryMap: MutableMap<String, Any> = HashMap()
-        geometryMap[LoiConverter.GEOMETRY_COORDINATES] =
-          toGeoPointList(mutation.geometry.shell.vertices)
+        geometryMap[LoiConverter.GEOMETRY_COORDINATES] = toGeoPointList(geometry.shell.vertices)
         geometryMap[LoiConverter.GEOMETRY_TYPE] = LoiConverter.POLYGON_TYPE
         map.put(LoiConverter.GEOMETRY, geometryMap)
       }
@@ -68,6 +66,6 @@ internal object LoiMutationConverter {
 
   private fun toGeoPoint(point: Point) = GeoPoint(point.coordinate.x, point.coordinate.y)
 
-  private fun toGeoPointList(point: ImmutableList<Point>): List<GeoPoint> =
+  private fun toGeoPointList(point: List<Point>): List<GeoPoint> =
     point.map { toGeoPoint(it) }.toImmutableList()
 }
